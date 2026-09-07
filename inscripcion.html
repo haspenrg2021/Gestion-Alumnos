@@ -779,11 +779,14 @@
             <select id="filtroCursoEstructural">
               <option value="">Todos los Cursos</option>
             </select>
-            <select id="filtroEstadoMatricula">
-              <option value="">Todos los Estados</option>
+            <select id="filtroEstadoMatricula" class="form-control-haspen">
+              <option value="todos">Todos los Estados</option>
               <option value="Regular">Regular</option>
-              <option value="Entrante">Mesa de Entrada</option>
-              <option value="Pase">Pase</option>
+              <option value="Mesa de Entrada">Mesa de Entrada</option>
+              <option value="Con Pase Entrante">Con Pase Entrante</option>
+              <option value="Con Pase Saliente">Con Pase Saliente</option>
+              <option value="Egresado con Título">Egresado con Título</option>
+              <option value="Egresado sin Título">Egresado sin Título</option>
               <option value="Baja">Baja</option>
             </select>
             <select id="filtroAuditoriaDocs">
@@ -1227,15 +1230,28 @@
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
                 <div class="input-group">
                   <label for="estadoAlumno">Estado de la Matrícula</label>
-                  <select id="estadoAlumno" required>
-                    <option value="Regular" selected>Regular</option>
-                    <option value="Entrante">Mesa de Entrada (Sin Curso)</option>
-                    <option value="Pase">Pase Activo</option>
-                    <option value="Baja">Baja Definitiva</option>
-                  </select>
+                  <!-- Campo A: Situación Escolar Actual -->
+                  <div class="form-grupo-haspen">
+                    <label for="estadoAlumno" class="label-haspen">Situación Escolar Actual *</label>
+                    <select id="estadoAlumno" class="form-control-haspen" required>
+                      <option value="Regular" selected>Regular</option>
+                      <option value="Baja">Baja</option>
+                    </select>
+                  </div>
+
+                  <!-- Campo B: Origen / Trámite Administrativo -->
+                  <div class="form-grupo-haspen">
+                    <label for="tramiteIngreso" class="label-haspen">Origen / Trámite Administrativo *</label>
+                    <select id="tramiteIngreso" class="form-control-haspen" required>
+                      <option value="Inscripción Estándar" selected>Inscripción Estándar</option>
+                      <option value="Mesa de Entrada">Mesa de Entrada</option>
+                      <option value="Con Pase Entrante">Con Pase Entrante</option>
+                      <option value="Con Pase Saliente">Con Pase Saliente</option>
+                    </select>
+                  </div>
                 </div>
                 <div class="input-group">
-                  <label for="selectCursoAlumno">Curso / Sección Asignada</label>
+                  <label for="selectCursoAlumno" class="label-haspen">Curso / Sección Asignada *</label>
                   <select id="selectCursoAlumno" required></select>
                 </div>
               </div>
@@ -1259,13 +1275,7 @@
                   <label for="paseFecha" style="color: #1d4ed8">Fecha del Trámite:</label
                   ><input type="date" id="paseFecha" />
                 </div>
-                <div class="input-group">
-                  <label for="paseTipoTramite" style="color: #1d4ed8">Tipo de Movimiento:</label>
-                  <select id="paseTipoTramite">
-                    <option value="Entrante">Pase Entrante (Viene al Colegio)</option>
-                    <option value="Saliente">Pase Saliente (Se va del Colegio)</option>
-                  </select>
-                </div>
+
                 <div class="input-group">
                   <label for="paseInstitucion" style="color: #1d4ed8">Establecimiento Educativo:</label
                   ><input type="text" id="paseInstitucion" placeholder="Nombre de la escuela" />

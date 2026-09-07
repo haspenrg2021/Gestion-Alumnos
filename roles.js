@@ -214,7 +214,7 @@
       contenedorBadgesHTML += crearBadgeVisual("Notas", p.libroCalificaciones);
       contenedorBadgesHTML += crearBadgeVisual("Previas", p.controlPrevias);
       contenedorBadgesHTML += crearBadgeVisual("Estadísticas", p.reportesEstadisticas);
-      contenedorBadgesHTML += crearBadgeVisual("Inclusión/PPI", p.inclusionPpi);
+      contenedorBadgesHTML += crearBadgeVisual("Inclusión Integral", p.inclusionPpi);
       contenedorBadgesHTML += crearBadgeVisual("Promoción", p.promocionAcademica);
       contenedorBadgesHTML += crearBadgeVisual("Comunicación", p.comunicacionInstitucional);
       contenedorBadgesHTML += crearBadgeVisual("Soporte", p.soporteTecnico);

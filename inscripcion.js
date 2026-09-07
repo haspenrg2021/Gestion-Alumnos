@@ -167,7 +167,8 @@
     selectGeneroTutor: document.getElementById("generoTutor"),
     inputCuilTutor: document.getElementById("cuilTutor"),
     inputEmailTutor: document.getElementById("emailTutor"),
-    selectEstadoMatricula: document.getElementById("estadoAlumno") || document.getElementById("filtroEstadoMatricula"),
+    selectEstadoMatricula: document.getElementById("estadoAlumno"),
+    selectTramiteIngreso: document.getElementById("tramiteIngreso"),
     selectCursoAsignado:
       document.getElementById("selectCursoAlumno") || document.getElementById("filtroCursoEstructural"),
     chkTrayectorias: document.getElementById("chkTrayectoriasFlexibles"),
@@ -624,14 +625,14 @@
 
     // Automatizaciones en tiempo real
     if (domElements.inputFechaNac) domElements.inputFechaNac.addEventListener("change", calcularEdadAutomatica); // 👈 Escucha cambio de fecha
-    const selectorEstadoHTML = document.getElementById("estadoAlumno");
-    if (selectorEstadoHTML) {
-      selectorEstadoHTML.addEventListener("change", alternarPanelPase);
+    // Escuchar cambios en la Situación Escolar Actual
+    if (domElements.selectEstadoMatricula) {
+      domElements.selectEstadoMatricula.addEventListener("change", alternarPanelPase);
     }
 
-    const selectorPaseHTML = document.getElementById("paseTipoTramite");
-    if (selectorPaseHTML) {
-      selectorPaseHTML.addEventListener("change", alternarPanelPase);
+    // Escuchar cambios en el Origen / Trámite Administrativo
+    if (domElements.selectTramiteIngreso) {
+      domElements.selectTramiteIngreso.addEventListener("change", alternarPanelPase);
     }
 
     if (domElements.chkPPI) domElements.chkPPI.addEventListener("change", alternarPanelPPI);
@@ -743,6 +744,9 @@
     if (domElements.panelCUD) domElements.panelCUD.style.display = "none";
     if (domElements.filaDocPPI) domElements.filaDocPPI.style.display = "none";
     if (domElements.filaDocCUD) domElements.filaDocCUD.style.display = "none";
+    // 3.1 Restablecer selectores de situación y trámite a sus valores iniciales por defecto
+    if (domElements.selectEstadoMatricula) domElements.selectEstadoMatricula.value = "Regular";
+    if (domElements.selectTramiteIngreso) domElements.selectTramiteIngreso.value = "Inscripción Estándar";
 
     // 4. Vaciar la matriz de almacenamiento de archivos en base64
     Object.keys(base64DocumentosTemporales).forEach((key) => {
@@ -779,6 +783,33 @@
       selectorCursoForm.disabled = false;
       selectorCursoForm.style.opacity = "1";
     }
+
+    // 🩺 REGULACIÓN DE PERMISOS: Módulo de Inclusión Integral (PPI / CUD / Trayectorias)
+    const tienePermisoEscrituraInc = window.permisoInclusion === "escritura";
+    const tienePermisoLecturaInc = window.permisoInclusion === "lectura" || window.permisoInclusion === "escritura";
+
+    // 1. Control del Checkbox y Panel de PPI
+    if (domElements.chkPPI) {
+      domElements.chkPPI.disabled = !tienePermisoEscrituraInc;
+    }
+    if (!tienePermisoLecturaInc && domElements.panelPPI) {
+      domElements.panelPPI.style.display = "none";
+    }
+
+    // 2. Control del Checkbox de Trayectorias Flexibles
+    if (domElements.chkTrayectorias) {
+      domElements.chkTrayectorias.disabled = !tienePermisoEscrituraInc;
+    }
+
+    // 3. Control del Checkbox y Panel de CUD
+    if (domElements.chkCUD) {
+      domElements.chkCUD.disabled = !tienePermisoEscrituraInc;
+    }
+    if (!tienePermisoLecturaInc && domElements.panelCUD) {
+      domElements.panelCUD.style.display = "none";
+    }
+
+    // Fin de la regulación de inclusión
 
     if (domElements.modalFormulario) {
       domElements.modalFormulario.style.display = "block";
@@ -906,8 +937,11 @@
 
         // Configuración Institucional e Inclusiones (Paso 2)
         estado: domElements.selectEstadoMatricula ? domElements.selectEstadoMatricula.value : "Regular",
+        tramiteIngreso: domElements.selectTramiteIngreso
+          ? domElements.selectTramiteIngreso.value
+          : "Inscripción Estándar",
         cursoId: domElements.selectCursoAsignado ? domElements.selectCursoAsignado.value : "",
-        cicloLectivo: domElements.filtroCiclo ? domElements.filtroCiclo.value : "2026",
+        cicloLectivo: domElements.filtroCiclo ? domElements.filtroCiclo.value : new Date().getFullYear().toString(),
 
         // Integración de Inclusiones y Trayectorias
         trayectoriasFlexibles: domElements.chkTrayectorias ? domElements.chkTrayectorias.checked : false,
@@ -1038,25 +1072,34 @@
   }
 
   function alternarPanelPase() {
-    const selectorEstado = document.getElementById("estadoAlumno");
-    const selectorCurso = document.getElementById("selectCursoAlumno");
-    const selectorPase = document.getElementById("paseTipoTramite");
+    // 1. Capturar los elementos reales registrados en domElements
+    const selectorEstado = domElements.selectEstadoMatricula;
+    const selectorTramite = domElements.selectTramiteIngreso;
+    const selectorCurso = domElements.selectCursoAsignado;
 
-    if (!selectorEstado) return;
+    if (!selectorEstado || !selectorTramite) return;
 
     const estado = selectorEstado.value;
-    const tipoPase = selectorPase ? selectorPase.value : "";
+    const tramite = selectorTramite.value;
 
+    // 2. Control del Panel Visual de Pases (Muestra campos si es Pase Entrante o Saliente)
     if (domElements.panelPase) {
-      domElements.panelPase.style.display = estado === "Pase" ? "flex" : "none";
+      if (tramite === "Con Pase Entrante" || tramite === "Con Pase Saliente") {
+        domElements.panelPase.style.display = "flex";
+      } else {
+        domElements.panelPase.style.display = "none";
+      }
     }
 
+    // 3. Control Obligatorio del Curso Asignado (Reglas de bloqueo)
     if (selectorCurso) {
-      if (estado === "Entrante" || estado === "Baja" || (estado === "Pase" && tipoPase === "Saliente")) {
+      if (estado === "Baja" || tramite === "Mesa de Entrada" || tramite === "Con Pase Saliente") {
+        // Bloqueo absoluto: El alumno no ocupa espacio físico en el aula
         selectorCurso.disabled = true;
         selectorCurso.value = "";
         selectorCurso.style.opacity = "0.5";
       } else {
+        // Habilitación: Estudiante Regular en condiciones de cursar
         selectorCurso.disabled = false;
         selectorCurso.style.opacity = "1";
       }
@@ -1336,9 +1379,11 @@
           usuarioLogueado.cursosAsignados = datosUsuarioDb.cursosAsignados || [];
 
           window.permisoLegajo = "lectura";
+          window.permisoInclusion = "lectura"; // 🌟 NUEVO: Variable de control unificado para Inclusión
 
           if (rolNormalizado === "administrador" || rolNormalizado === "admin") {
             window.permisoLegajo = "escritura";
+            window.permisoInclusion = "escritura"; // El administrador tiene acceso total
             rolNormalizado = "administrador";
           } else if (rolNormalizado !== "") {
             try {
@@ -1347,6 +1392,8 @@
 
               if (rolSnapshot.exists()) {
                 const matrizPermisos = rolSnapshot.data().permisos || {};
+
+                // 1. Validar el permiso del Legajo General
                 const capLegajo = String(matrizPermisos.legajoDigital || "ninguno")
                   .toLowerCase()
                   .trim();
@@ -1356,6 +1403,19 @@
                 } else {
                   window.permisoLegajo = "lectura";
                 }
+
+                // 2. 🌟 NUEVO: Validar y capturar el permiso unificado de Inclusión Integral
+                const capInclusion = String(matrizPermisos.inclusionPpi || "ninguno")
+                  .toLowerCase()
+                  .trim();
+
+                if (capInclusion === "escritura" || capInclusion === "administrador") {
+                  window.permisoInclusion = "escritura";
+                } else if (capInclusion === "lectura" || capInclusion === "usuario") {
+                  window.permisoInclusion = "lectura";
+                } else {
+                  window.permisoInclusion = "ninguno"; // Bloqueado por completo
+                }
               }
             } catch (errRol) {
               console.error("Error al interceptar el rol:", errRol);
@@ -1364,6 +1424,7 @@
 
           usuarioLogueado.rolReal = rolNormalizado;
           usuarioLogueado.permisoLegajoReal = window.permisoLegajo;
+          usuarioLogueado.permisoInclusionReal = window.permisoInclusion; // Guardar en la sesión activa
 
           if (domElements.csvSection) {
             domElements.csvSection.style.display = rolNormalizado === "administrador" ? "flex" : "none";
