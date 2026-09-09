@@ -661,19 +661,53 @@
     // Interceptor dinámico para acciones de la grilla de alumnos
     if (domElements.tablaAlumnos) {
       domElements.tablaAlumnos.addEventListener("click", async (e) => {
+        // =========================================================================
+        // ACCIÓN: VER DATOS DE CONTACTO (👁)
+        // =========================================================================
+        const botonFicha = e.target.closest(".btn-fila-ficha");
+        if (botonFicha) {
+          const nombre = botonFicha.getAttribute("data-nombre");
+          const dni = botonFicha.getAttribute("data-dni");
+          const direccion = botonFicha.getAttribute("data-direccion");
+          const tel1 = botonFicha.getAttribute("data-tel1");
+          const tel2 = botonFicha.getAttribute("data-tel2");
+          const tutor = botonFicha.getAttribute("data-tutor");
+          const tutorDni = botonFicha.getAttribute("data-tutordni");
+
+          const contenedorModal = domElements.modalImpresion || document.getElementById("modalImpresionContenedor");
+          const cuerpoModal = document.getElementById("modalImpresionCuerpo");
+
+          if (contenedorModal && cuerpoModal) {
+            cuerpoModal.innerHTML = `
+              <div style="padding: 20px; background: white; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit; text-align: left; max-width: 550px; margin: 30px auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                  <h2 style="color: #1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; margin-top: 0; font-size: 18px;">Ficha de Contacto Institucional</h2>
+                  <p style="font-size: 15px; margin: 12px 0;"><strong>Estudiante:</strong> ${nombre}</p>
+                  <p style="font-size: 13px; margin: 8px 0; color: #475569;"><strong>DNI Alumno:</strong> ${dni}</p>
+                  <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 15px 0;">
+                  <div style="display: flex; flex-direction: column; gap: 10px; color: #334155; font-size: 14px;">
+                      <div><strong>📍 Dirección de Residencia:</strong> ${direccion}</div>
+                      <div><strong>📞 Teléfono de Contacto 1:</strong> <span style="color: #2563eb; font-weight: bold;">${tel1}</span></div>
+                      <div><strong>📱 Teléfono Alternativo 2:</strong> ${tel2}</div>
+                      <div style="background: #f8fafc; padding: 12px; border-left: 4px solid #10b981; margin-top: 5px; border-radius: 0 4px 4px 0;">
+                          <strong style="color: #065f46;">👤 Adulto Responsable / Tutor:</strong> ${tutor}<br>
+                          <span style="font-size: 12px; color: #64748b;">DNI Tutor: ${tutorDni}</span>
+                      </div>
+                  </div>
+              </div>
+            `;
+            contenedorModal.style.display = "block";
+          }
+          return;
+        }
+
+        // Aquí abajo continúa tu código original del botón editar...
         const botonEditar = e.target.closest(".btn-fila-editar");
         if (botonEditar) {
           const dniAlumno = botonEditar.getAttribute("data-dni");
           const cursoOrigen = botonEditar.getAttribute("data-curso-origen") || "";
-
-          // 1. Sincronizar las variables globales de control de edición
           window.esEdicion = true;
           cursoIdOriginalLegajo = cursoOrigen;
-
           console.log(`[Modo Edición] Activado para DNI: ${dniAlumno}. Curso origen: ${cursoOrigen}`);
-
-          // Nota técnica: Aquí el sistema llamará posteriormente a la carga de datos en el Wizard
-          // Por ahora, dejamos el puente de control de caché listo.
         }
       });
     }
@@ -1354,7 +1388,7 @@
     inicializarEventos();
 
     // 2. Control estricto de la sesión real activa de la plataforma
-    const datosSesionRaw = localStorage.getItem("usuarioActivo");
+    const datosSesionRaw = sessionStorage.getItem("usuarioActivo");
     if (!datosSesionRaw) {
       window.location.href = "index.html";
       return;

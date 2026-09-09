@@ -73,7 +73,7 @@
 
   // --- PROTECCIÓN COERCITIVA RBAC PARA LA VISTA DE ROLES ORIGINAL ---
   async function verificarAutenticacionAdmin() {
-    const datosSesion = localStorage.getItem("usuarioActivo");
+    const datosSesion = sessionStorage.getItem("usuarioActivo");
     if (!datosSesion) {
       window.location.href = "index.html";
       return;

@@ -223,7 +223,7 @@
 
   // --- PROTECCIÓN COERCITIVA RBAC ---
   async function verificarAutenticacionAdmin() {
-    const datosSesion = localStorage.getItem("usuarioActivo");
+    const datosSesion = sessionStorage.getItem("usuarioActivo");
     if (!datosSesion) {
       window.location.href = "index.html";
       return;
@@ -1120,7 +1120,7 @@
   };
 
   window.eliminarCuentaUsuario = async function (dni) {
-    const datosSesion = localStorage.getItem("usuarioActivo");
+    const datosSesion = sessionStorage.getItem("usuarioActivo");
     const usuarioLogueado = datosSesion ? JSON.parse(datosSesion) : {};
 
     // 1. Bloqueo de auto-eliminación con Toast estético y lenguaje institucional
